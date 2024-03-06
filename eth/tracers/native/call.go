@@ -179,16 +179,24 @@ func (t *callTracer) CaptureState(pc uint64, op vm.OpCode, gas, cost uint64, sco
 
 	// nolint : exhaustive
 	switch op {
-	case vm.LOG0, vm.LOG1, vm.LOG2, vm.LOG3, vm.LOG4:
+	case vm.REVERT, vm.LOG0, vm.LOG1, vm.LOG2, vm.LOG3, vm.LOG4:
 		size := int(op - vm.LOG0)
 
 		stack := scope.Stack
 		stackData := stack.Data()
 
+		if len(stackData) < 2 {
+			return
+		}
+
 		// Don't modify the stack
 		mStart := stackData[len(stackData)-1]
 		mSize := stackData[len(stackData)-2]
 		topics := make([]common.Hash, size)
+
+		if len(stackData) < 2+size {
+			return
+		}
 
 		for i := 0; i < size; i++ {
 			topic := stackData[len(stackData)-2-(i+1)]
