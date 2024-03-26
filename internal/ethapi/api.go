@@ -702,13 +702,23 @@ func AccessListOnState(ctx context.Context, b Backend, header *types.Header, db 
 			return nil, 0, nil, err
 		}
 
+		blockCtx := core.NewEVMBlockContext(header, NewChainContext(ctx, b), nil)
+
 		// Apply the transaction with the access list tracer
 		tracer := logger.NewAccessListTracer(accessList, args.from(), to, precompiles)
 		config := vm.Config{Tracer: tracer, NoBaseFee: true}
-		vmenv, _, err := b.GetEVM(ctx, msg, statedb, header, &config)
-		if err != nil {
+		vmenv, vmErr := b.GetEVM(ctx, msg, statedb, header, &config, &blockCtx)
+		// Wait for the context to be done and cancel the evm. Even if the
+		// EVM has finished, cancelling may be done (repeatedly)
+		go func() {
+			<-ctx.Done()
+			vmenv.Cancel()
+		}()
+
+		if err := vmErr(); err != nil {
 			return nil, 0, nil, err
 		}
+
 		res, err := core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(msg.GasLimit), nil)
 		if err != nil {
 			return nil, 0, nil, fmt.Errorf("failed to apply transaction: %v err: %v", args.toTransaction().Hash(), err)
@@ -808,8 +818,9 @@ func (s *SearcherAPI) CallBundle(ctx context.Context, args CallBundleArgs) (map[
 	if args.BaseFee != nil {
 		baseFee = args.BaseFee
 	} else if s.b.ChainConfig().IsLondon(big.NewInt(args.BlockNumber.Int64())) {
-		baseFee = misc.CalcBaseFee(s.b.ChainConfig(), parent)
+		baseFee = eip1559.CalcBaseFee(s.b.ChainConfig(), parent)
 	}
+
 	header := &types.Header{
 		ParentHash: parent.Hash(),
 		Number:     blockNumber,
@@ -838,11 +849,11 @@ func (s *SearcherAPI) CallBundle(ctx context.Context, args CallBundleArgs) (map[
 	// and apply the message.
 	gp := new(core.GasPool).AddGas(math.MaxUint64)
 
-	results := []map[string]interface{}{}
+	var results []map[string]interface{}
 	coinbaseBalanceBefore := state.GetBalance(coinbase)
 
 	bundleHash := sha3.NewLegacyKeccak256()
-	signer := types.MakeSigner(s.b.ChainConfig(), blockNumber)
+	signer := types.MakeSigner(s.b.ChainConfig(), header.Number, header.Time)
 	var totalGasUsed uint64
 	gasFees := new(big.Int)
 	for i, tx := range txs {
