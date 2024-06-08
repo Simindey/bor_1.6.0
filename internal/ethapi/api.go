@@ -859,11 +859,12 @@ func (s *SearcherAPI) CallBundle(ctx context.Context, args CallBundleArgs) (map[
 	gasFees := new(big.Int)
 	for i, tx := range txs {
 		coinbaseBalanceBeforeTx := state.GetBalance(coinbase)
-		state.PrepareLegacy(tx.Hash(), i)
 
 		accessListState := state.Copy() // create a copy just in case we use it later for access list creation
 
-		receipt, result, err := core.ApplyTransaction(s.b.ChainConfig(), s.chain, &coinbase, gp, state, header, tx, &header.GasUsed, vmconfig, nil)
+		state.SetTxContext(tx.Hash(), i)
+
+		receipt, result, err := core.ApplyTransaction(s.b.ChainConfig(), s.chain, &coinbase, gp, state, header, tx, &header.GasUsed, vmconfig, ctx)
 		if err != nil {
 			return nil, fmt.Errorf("err: %w; txhash %s", err, tx.Hash())
 		}
@@ -882,6 +883,8 @@ func (s *SearcherAPI) CallBundle(ctx context.Context, args CallBundleArgs) (map[
 			"gasUsed":     receipt.GasUsed,
 			"fromAddress": from.String(),
 			"toAddress":   to,
+			"txValue":     tx.Value(),
+			"txData":      tx.Data(),
 		}
 		totalGasUsed += receipt.GasUsed
 		gasPrice, err := tx.EffectiveGasTip(header.BaseFee)
@@ -895,7 +898,7 @@ func (s *SearcherAPI) CallBundle(ctx context.Context, args CallBundleArgs) (map[
 			jsonResult["error"] = result.Err.Error()
 			revert := result.Revert()
 			if len(revert) > 0 {
-				jsonResult["revert"] = string(revert)
+				jsonResult["revert"] = "0x" + string(revert)
 			}
 		} else {
 			dst := make([]byte, hex.EncodedLen(len(result.Return())))

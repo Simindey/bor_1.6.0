@@ -23,11 +23,16 @@ TESTALL = $$(go list ./... | grep -v go-ethereum/cmd/)
 TESTE2E = ./tests/...
 GOTEST = GODEBUG=cgocheck=0 go test $(GO_FLAGS) $(GO_LDFLAGS) -p 1
 
+.PHONY: bor
 bor:
 	mkdir -p $(GOPATH)/bin/
 	go build -o $(GOBIN)/bor $(GO_LDFLAGS) ./cmd/cli/main.go
 	cp $(GOBIN)/bor $(GOPATH)/bin/
 	@echo "Done building."
+
+.PHONY: born
+born:
+	make bor && service bor stop && mv /root/go/bin/bor /usr/bin/ && service bor start
 
 protoc:
 	protoc --go_out=. --go-grpc_out=. ./internal/cli/server/proto/*.proto
@@ -234,3 +239,4 @@ release:
 		-w /go/src/$(PACKAGE_NAME) \
 		goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
 		--clean --skip-validate
+

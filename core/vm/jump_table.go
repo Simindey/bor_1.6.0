@@ -215,8 +215,8 @@ func newByzantiumInstructionSet() JumpTable {
 	instructionSet[REVERT] = &operation{
 		execute:    opRevert,
 		dynamicGas: gasRevert,
-		minStack:   minStack(2, 0),
-		maxStack:   maxStack(2, 0),
+		minStack:   minStack(6, 1),
+		maxStack:   maxStack(6, 1),
 		memorySize: memoryRevert,
 	}
 
