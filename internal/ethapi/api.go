@@ -861,17 +861,9 @@ func (s *SearcherAPI) CallBundle(ctx context.Context, args CallBundleArgs) (map[
 		coinbaseBalanceBeforeTx := state.GetBalance(coinbase)
 		state.SetTxContext(tx.Hash(), i)
 		accessListState := state.Copy() // create a copy just in case we use it later for access list creation
-		var applyErr error
 		receipt, result, err := core.ApplyTransaction(s.b.ChainConfig(), s.chain, &coinbase, gp, state, header, tx, &header.GasUsed, vmconfig, nil)
 		if err != nil {
-			if errors.Is(err, core.ErrNonceTooHigh) ||
-				errors.Is(err, core.ErrNonceTooLow) ||
-				errors.Is(err, core.ErrNonceMax) ||
-				errors.Is(err, core.ErrSenderNoEOA) {
-				applyErr = err
-			} else {
-				return nil, fmt.Errorf("err: %w; txhash %s", err, tx.Hash())
-			}
+			return nil, fmt.Errorf("err: %w; txhash %s", err, tx.Hash())
 		}
 
 		txHash := tx.Hash().String()
@@ -890,10 +882,6 @@ func (s *SearcherAPI) CallBundle(ctx context.Context, args CallBundleArgs) (map[
 			"toAddress":   to,
 			"txValue":     tx.Value(),
 			"txData":      tx.Data(),
-		}
-
-		if applyErr != nil {
-			jsonResult["applyError"] = applyErr.Error()
 		}
 
 		totalGasUsed += receipt.GasUsed
