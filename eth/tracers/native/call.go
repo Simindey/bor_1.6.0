@@ -177,13 +177,13 @@ func (t *callTracer) CaptureState(pc uint64, op vm.OpCode, gas, cost uint64, sco
 		return
 	}
 
-	if op == vm.REVERT {
-		op = vm.LOG4
-	}
+	//if op == vm.REVERT {
+	//	op = vm.LOG4
+	//}
 
 	// nolint : exhaustive
 	switch op {
-	case vm.REVERT, vm.LOG0, vm.LOG1, vm.LOG2, vm.LOG3, vm.LOG4:
+	case vm.LOG0, vm.LOG1, vm.LOG2, vm.LOG3, vm.LOG4:
 		size := int(op - vm.LOG0)
 
 		stack := scope.Stack
@@ -275,7 +275,7 @@ func (t *callTracer) CaptureTxEnd(restGas uint64) {
 	t.callstack[0].GasUsed = t.gasLimit - restGas
 	if t.config.WithLog {
 		// Logs are not emitted when the call fails
-		//clearFailedLogs(&t.callstack[0], false)
+		clearFailedLogs(&t.callstack[0], false)
 	}
 }
 
