@@ -859,12 +859,10 @@ func (s *SearcherAPI) CallBundle(ctx context.Context, args CallBundleArgs) (map[
 	gasFees := new(big.Int)
 	for i, tx := range txs {
 		coinbaseBalanceBeforeTx := state.GetBalance(coinbase)
-
+		state.SetTxContext(tx.Hash(), i)
 		accessListState := state.Copy() // create a copy just in case we use it later for access list creation
 
-		state.SetTxContext(tx.Hash(), i)
-
-		receipt, result, err := core.ApplyTransaction(s.b.ChainConfig(), s.chain, &coinbase, gp, state, header, tx, &header.GasUsed, vmconfig, ctx)
+		receipt, result, err := core.ApplyTransaction(s.b.ChainConfig(), s.chain, &coinbase, gp, state, header, tx, &header.GasUsed, vmconfig, nil)
 		if err != nil {
 			return nil, fmt.Errorf("err: %w; txhash %s", err, tx.Hash())
 		}
@@ -898,12 +896,12 @@ func (s *SearcherAPI) CallBundle(ctx context.Context, args CallBundleArgs) (map[
 			jsonResult["error"] = result.Err.Error()
 			revert := result.Revert()
 			if len(revert) > 0 {
-				jsonResult["revert"] = "0x" + string(revert)
+				jsonResult["revert"] = string(revert)
 			}
 		} else {
 			dst := make([]byte, hex.EncodedLen(len(result.Return())))
 			hex.Encode(dst, result.Return())
-			jsonResult["value"] = "0x" + string(dst)
+			jsonResult["value"] = string(dst)
 		}
 		// if simulation logs are requested append it to logs
 		if args.SimulationLogs {
