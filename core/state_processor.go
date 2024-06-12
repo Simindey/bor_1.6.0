@@ -18,6 +18,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
 
@@ -171,7 +172,7 @@ func applyTransaction(msg *Message, config *params.ChainConfig, gp *GasPool, sta
 		output2.Add(output2, result.FeeTipped),
 	)
 
-	if result.Err == vm.ErrInterrupt {
+	if errors.Is(result.Err, vm.ErrInterrupt) {
 		return nil, nil, result.Err
 	}
 

@@ -880,8 +880,6 @@ func (s *SearcherAPI) CallBundle(ctx context.Context, args CallBundleArgs) (map[
 			"gasUsed":     receipt.GasUsed,
 			"fromAddress": from.String(),
 			"toAddress":   to,
-			"txValue":     tx.Value(),
-			"txData":      tx.Data(),
 		}
 
 		totalGasUsed += receipt.GasUsed
