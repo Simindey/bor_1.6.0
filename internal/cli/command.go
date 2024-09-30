@@ -200,6 +200,16 @@ func Commands() map[string]MarkDownCommandFactory {
 				Meta: meta,
 			}, nil
 		},
+		"snapshot prune-block": func() (MarkDownCommand, error) {
+			return &PruneBlockCommand{
+				Meta: meta,
+			}, nil
+		},
+		"snapshot inspect-ancient-db": func() (MarkDownCommand, error) {
+			return &InspectAncientDbCommand{
+				Meta: meta,
+			}, nil
+		},
 	}
 }
 
@@ -223,7 +233,7 @@ func (m *Meta2) NewFlagSet(n string) *flagset.Flagset {
 }
 
 func (m *Meta2) Conn() (*grpc.ClientConn, error) {
-	conn, err := grpc.Dial(m.addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(m.addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to server: %v", err)
 	}

@@ -133,8 +133,9 @@ const (
 	DefaultBaseFeeChangeDenominator = 8 // Bounds the amount the base fee can change between blocks.
 	DefaultElasticityMultiplier     = 2 // Bounds the maximum gas limit an EIP-1559 block may have.
 
-	MaxCodeSize     = 24576           // Maximum bytecode to permit for a contract
-	MaxInitCodeSize = 2 * MaxCodeSize // Maximum initcode to permit in a creation transaction and create instructions
+	MaxCodeSize              = 24576           // Maximum bytecode to permit for a contract
+	MaxCodeSizePostAhmedabad = 32768           // Maximum bytecode to permit for a contract post Ahmedabad hard fork (bor / polygon pos) (32KB)
+	MaxInitCodeSize          = 2 * MaxCodeSize // Maximum initcode to permit in a creation transaction and create instructions
 
 	// Precompiled contract gas prices
 
@@ -181,6 +182,15 @@ const (
 
 	BlobTxTargetBlobGasPerBlock = 3 * BlobTxBlobGasPerBlob // Target consumable blob gas for data blobs per block (for 1559-like pricing)
 	MaxBlobGasPerBlock          = 6 * BlobTxBlobGasPerBlob // Maximum consumable blob gas for data blobs per block
+
+	// BorDefaultMinerGasPrice defines the minimum gas price for bor validators to mine a transaction.
+	BorDefaultMinerGasPrice = 25 * GWei
+
+	// BorDefaultTxPoolPriceLimit defines the minimum gas price limit for bor to enforce txs acceptance into the pool.
+	BorDefaultTxPoolPriceLimit = 25 * GWei
+
+	// BorDefaultGpoIgnorePrice defines the minimum gas price below which bor gpo will ignore transactions.
+	BorDefaultGpoIgnorePrice = 25 * GWei
 )
 
 // Gas discount table for BLS12-381 G1 and G2 multi exponentiation operations

@@ -329,10 +329,13 @@ func MVRead[T any](s *StateDB, k blockstm.Key, defaultV T, readStorage func(s *S
 		return defaultV
 	}
 
-	// TODO: I assume we don't want to overwrite an existing read because this could - for example - change a storage
-	//  read to map if the same value is read multiple times.
-	if _, ok := s.readMap[k]; !ok {
+	if prevRd, ok := s.readMap[k]; !ok {
 		s.readMap[k] = rd
+	} else {
+		if prevRd.Kind != rd.Kind || prevRd.V.TxnIndex != rd.V.TxnIndex || prevRd.V.Incarnation != rd.V.Incarnation {
+			s.dep = rd.V.TxnIndex
+			panic("Read conflict detected")
+		}
 	}
 
 	return
@@ -1091,7 +1094,7 @@ func (s *StateDB) createObject(addr common.Address) (newobj, prev *stateObject) 
 		prevAccount, ok := s.accountsOrigin[prev.address]
 		s.journal.append(resetObjectChange{
 			account:                &addr,
-			prev:                   prev,
+			prev:                   prev.deepCopy(s),
 			prevdestruct:           prevdestruct,
 			prevAccount:            s.accounts[prev.addrHash],
 			prevStorage:            s.storages[prev.addrHash],
@@ -1104,9 +1107,6 @@ func (s *StateDB) createObject(addr common.Address) (newobj, prev *stateObject) 
 		delete(s.accountsOrigin, prev.address)
 		delete(s.storagesOrigin, prev.address)
 	}
-
-	newobj.created = true
-
 	s.setStateObject(newobj)
 
 	MVWrite(s, blockstm.NewAddressKey(addr))
@@ -1470,7 +1470,7 @@ func (s *StateDB) fastDeleteStorage(addrHash common.Hash, root common.Hash) (boo
 // employed when the associated state snapshot is not available. It iterates the
 // storage slots along with all internal trie nodes via trie directly.
 func (s *StateDB) slowDeleteStorage(addr common.Address, addrHash common.Hash, root common.Hash) (bool, common.StorageSize, map[common.Hash][]byte, *trienode.NodeSet, error) {
-	tr, err := s.db.OpenStorageTrie(s.originalRoot, addr, root)
+	tr, err := s.db.OpenStorageTrie(s.originalRoot, addr, root, s.trie)
 	if err != nil {
 		return false, 0, nil, nil, fmt.Errorf("failed to open storage trie, err: %w", err)
 	}
