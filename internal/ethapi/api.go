@@ -21,7 +21,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/tendermint/crypto/sha3"
 	"math/big"
 	"runtime"
 	"strings"
@@ -52,6 +51,7 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/ethereum/go-ethereum/trie"
+	"github.com/tendermint/crypto/sha3"
 	"github.com/tyler-smith/go-bip39"
 )
 
@@ -936,7 +936,6 @@ func (s *SearcherAPI) CallBundle(ctx context.Context, args CallBundleArgs) (map[
 					log.Info("CallBundle accesslist creation encountered vmerr", "vmerr", vmerr)
 				}
 				jsonResult["accessList"] = acl
-
 			} else {
 				log.Info("CallBundle accesslist creation encountered err", "err", err)
 				jsonResult["accessList"] = acl //
