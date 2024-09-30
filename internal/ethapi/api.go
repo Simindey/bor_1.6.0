@@ -713,17 +713,13 @@ func AccessListOnState(ctx context.Context, b Backend, header *types.Header, db 
 		// Apply the transaction with the access list tracer
 		tracer := logger.NewAccessListTracer(accessList, args.from(), to, precompiles)
 		config := vm.Config{Tracer: tracer, NoBaseFee: true}
-		vmenv, vmErr := b.GetEVM(ctx, msg, statedb, header, &config, &blockCtx)
+		vmenv := b.GetEVM(ctx, msg, statedb, header, &config, &blockCtx)
 		// Wait for the context to be done and cancel the evm. Even if the
 		// EVM has finished, cancelling may be done (repeatedly)
 		go func() {
 			<-ctx.Done()
 			vmenv.Cancel()
 		}()
-
-		if err := vmErr(); err != nil {
-			return nil, 0, nil, err
-		}
 
 		res, err := core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(msg.GasLimit), nil)
 		if err != nil {
