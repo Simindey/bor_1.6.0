@@ -2,11 +2,11 @@
 Bor is the Official Golang implementation of the Polygon PoS blockchain. It is a fork of [geth](https://github.com/ethereum/go-ethereum) and is EVM compatible (upto London fork).
 
 [![API Reference](
-https://camo.githubusercontent.com/915b7be44ada53c290eb157634330494ebe3e30a/68747470733a2f2f676f646f632e6f72672f6769746875622e636f6d2f676f6c616e672f6764646f3f7374617475732e737667
+https://pkg.go.dev/badge/github.com/maticnetwork/bor
 )](https://pkg.go.dev/github.com/maticnetwork/bor)
 [![Go Report Card](https://goreportcard.com/badge/github.com/maticnetwork/bor)](https://goreportcard.com/report/github.com/maticnetwork/bor)
 ![MIT License](https://img.shields.io/github/license/maticnetwork/bor)
-[![Discord](https://img.shields.io/discord/714888181740339261?color=1C1CE1&label=Polygon%20%7C%20Discord%20%F0%9F%91%8B%20&style=flat-square)](https://discord.com/invite/0xPolygonDevs)
+[![Discord](https://img.shields.io/badge/discord-join%20chat-blue.svg)](https://discord.com/invite/0xpolygonrnd)
 [![Twitter Follow](https://img.shields.io/twitter/follow/0xPolygon.svg?style=social)](https://twitter.com/0xPolygon)
 
 ### Installing bor using packaging
@@ -15,13 +15,13 @@ The easiest way to get started with bor is to install the packages using the com
     
     curl -L https://raw.githubusercontent.com/maticnetwork/install/main/bor.sh | bash -s -- v0.4.0 <network> <node_type>
 
-The network accepts `mainnet` or `mumbai` and the node type accepts `validator` or `sentry` or `archive`. The installation script does the following things:
+The network accepts `mainnet`,`amoy` or `mumbai` and the node type accepts `validator` or `sentry` or `archive`. The installation script does the following things:
 - Create a new user named `bor`.
 - Install the bor binary at `/usr/bin/bor`.
 - Dump the suitable config file (based on the network and node type provided) at `/var/lib/bor` and uses it as the home dir.
 - Create a systemd service named `bor` at `/lib/systemd/system/bor.service` which starts bor using the config file as `bor` user.
 
-The releases supports both the networks i.e. Polygon Mainnet and Mumbai (Testnet) unless explicitly specified. Before the stable release for mainnet, pre-releases will be available marked with `beta` tag for deploying on Mumbai (testnet). On sufficient testing, stable release for mainnet will be announced with a forum post.
+The releases supports both the networks i.e. Polygon Mainnet, Amoy and Mumbai (Testnet) unless explicitly specified. Before the stable release for mainnet, pre-releases will be available marked with `beta` tag for deploying on Mumbai/Amoy (testnet). On sufficient testing, stable release for mainnet will be announced with a forum post.
 
 ### Building from source
 
@@ -79,4 +79,4 @@ included in our repository in the `COPYING` file.
 
 ## Join our Discord server
 
-Join Polygon community  – share your ideas or just say hi over [on Discord](https://discord.com/invite/0xPolygonDevs).
+Join Polygon community  – share your ideas or just say hi over on [Polygon Community Discord](https://discord.com/invite/0xPolygonCommunity) or on [Polygon R&D Discord](https://discord.com/invite/0xpolygonrnd).
